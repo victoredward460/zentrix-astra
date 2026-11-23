@@ -80,7 +80,7 @@ These are not required to launch the locally implemented modules:
 - Install production PHP dependencies from `composer.lock`: `composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction`.
 - Use `php artisan optimize` only after production variables are available in the process. Re-run the appropriate cache commands and restart workers after configuration changes.
 - Keep `storage/` and `bootstrap/cache/` writable by the PHP service account. Persist `storage/app/private/file-checks` across restarts and releases.
-- `APP_URL` anchors the trusted-host rule. The app also permits `127.0.0.1` and `localhost` for loopback health checks; explicitly update and test the allowlist before adding other aliases.
+- `APP_URL` anchors trusted-host validation for application routes; `127.0.0.1` and `localhost` are also permitted. Only the generic public liveness endpoint `/up` bypasses host validation so internal platform probes work. Set the deployment health-check path to `/up`; other routes retain the host allowlist.
 - Configure the host to terminate HTTPS, redirect HTTP to HTTPS, and correctly communicate the external scheme to PHP. Do not trust arbitrary forwarded headers; use the host's documented trusted-proxy settings if application-level proxy trust becomes necessary.
 
 For platform requirements and the release process, see [Deployment Guide](./DEPLOYMENT_GUIDE.md). For missing platform capabilities and non-launch-ready items, see [Known Limitations](./KNOWN_LIMITATIONS.md).

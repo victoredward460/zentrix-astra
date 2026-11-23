@@ -3,9 +3,11 @@
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsurePlatformFeatureEnabled;
 use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\TrustHostsForHealthChecks;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\TrustHosts as LaravelTrustHosts;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -21,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'platform.feature' => EnsurePlatformFeatureEnabled::class,
             'role' => EnsureUserHasRole::class,
         ]);
+        $middleware->replace(LaravelTrustHosts::class, TrustHostsForHealthChecks::class);
         $middleware->redirectGuestsTo(fn (Request $request) => route('login'));
         $middleware->redirectUsersTo(fn (Request $request) => route('dashboard'));
         $middleware->trustHosts(

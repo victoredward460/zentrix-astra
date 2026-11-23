@@ -31,7 +31,7 @@ The required Etopia account/deployment credential type, scope, and configuration
 3. Persistent private file storage for `storage/app/private/file-checks`. The application currently uses a local private disk for File Check; it does not switch that disk to S3 using `FILESYSTEM_DISK`. If the host's local filesystem is ephemeral or deployments use multiple instances, **do not deploy File Check until a durable shared private volume is confirmed or private-object-storage support is deliberately implemented and tested**.
 4. A managed worker process for Laravel's database queue and a scheduler/cron facility. The scheduler includes retention/pruning tasks; OpenPhish refresh is no longer scheduled.
 5. A mail provider for password-reset delivery. The template's default `MAIL_MAILER=log` is for development only; it writes reset messages to logs.
-6. A domain and HTTPS certificate. Host validation allows the hostname in `APP_URL` plus `127.0.0.1` and `localhost` for loopback health checks. Other aliases must be explicitly added to the trusted-host configuration.
+6. A domain and HTTPS certificate. Host validation allows the hostname in `APP_URL` plus `127.0.0.1` and `localhost` for normal requests. The public, generic Laravel liveness endpoint `/up` accepts internal probe hostnames; configure the platform health-check path as `/up`. Other application routes retain trusted-host validation.
 7. Optional external integrations are not launch prerequisites. OpenRouter uses free routing only and may be limited by model availability/rate limits. VirusTotal is optional. OpenPhish is retired from current runtime behavior.
 
 ### Release procedure

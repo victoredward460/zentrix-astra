@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\TrustHostsForHealthChecks;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Middleware\TrustHosts;
@@ -21,6 +22,13 @@ class HealthCheckTest extends TestCase
         $this->get('/up')->assertOk();
     }
 
+    public function test_liveness_endpoint_accepts_the_deployment_probe_host(): void
+    {
+        $this->withServerVariables(['HTTP_HOST' => 'health-probe.internal'])
+            ->get('/up')
+            ->assertOk();
+    }
+
     public function test_loopback_hosts_are_trusted_without_allowing_unconfigured_hosts(): void
     {
         config(['app.url' => 'https://zentrix.example']);
@@ -34,6 +42,31 @@ class HealthCheckTest extends TestCase
 
             $this->expectException(SuspiciousOperationException::class);
             Request::create('http://untrusted.example/index.php')->getHost();
+        } finally {
+            Request::setTrustedHosts([]);
+        }
+    }
+
+    public function test_only_the_liveness_endpoint_bypasses_trusted_host_validation(): void
+    {
+        $middleware = app(TrustHostsForHealthChecks::class);
+        Request::setTrustedHosts(['^zentrix\.example$']);
+
+        try {
+            $healthResponse = $middleware->handle(
+                Request::create('http://health-probe.internal/up'),
+                fn (Request $request) => response($request->getHost()),
+            );
+
+            $this->assertSame('health-probe.internal', $healthResponse->getContent());
+
+            Request::setTrustedHosts(['^zentrix\.example$']);
+
+            $this->expectException(SuspiciousOperationException::class);
+            $middleware->handle(
+                Request::create('http://health-probe.internal/agent'),
+                fn (Request $request) => response($request->getHost()),
+            );
         } finally {
             Request::setTrustedHosts([]);
         }
