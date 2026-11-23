@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Http\Requests\Auth;
+
+use App\Support\PasswordRules;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
+
+class RegisteredUserRequest extends FormRequest
+{
+    protected function prepareForValidation(): void
+    {
+        $email = $this->input('email');
+
+        if (is_string($email)) {
+            $this->merge(['email' => Str::lower(trim($email))]);
+        }
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', PasswordRules::strong(), 'confirmed'],
+        ];
+    }
+}
