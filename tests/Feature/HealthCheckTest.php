@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Middleware\TrustHosts;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PDOException;
+use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Tests\TestCase;
 
 class HealthCheckTest extends TestCase
@@ -16,6 +19,24 @@ class HealthCheckTest extends TestCase
     public function test_liveness_endpoint_returns_success(): void
     {
         $this->get('/up')->assertOk();
+    }
+
+    public function test_loopback_hosts_are_trusted_without_allowing_unconfigured_hosts(): void
+    {
+        config(['app.url' => 'https://zentrix.example']);
+
+        Request::setTrustedHosts(app(TrustHosts::class)->hosts());
+
+        try {
+            $this->assertSame('zentrix.example', Request::create('https://zentrix.example/index.php')->getHost());
+            $this->assertSame('127.0.0.1', Request::create('http://127.0.0.1/index.php')->getHost());
+            $this->assertSame('localhost', Request::create('http://localhost/index.php')->getHost());
+
+            $this->expectException(SuspiciousOperationException::class);
+            Request::create('http://untrusted.example/index.php')->getHost();
+        } finally {
+            Request::setTrustedHosts([]);
+        }
     }
 
     public function test_readiness_endpoint_checks_the_database(): void

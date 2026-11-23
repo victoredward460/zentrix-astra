@@ -24,7 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (Request $request) => route('login'));
         $middleware->redirectUsersTo(fn (Request $request) => route('dashboard'));
         $middleware->trustHosts(
-            at: fn () => ['^'.preg_quote((string) parse_url((string) config('app.url'), PHP_URL_HOST)).'$'],
+            at: fn () => array_values(array_unique([
+                '^'.preg_quote((string) parse_url((string) config('app.url'), PHP_URL_HOST)).'$',
+                '^127\.0\.0\.1$',
+                '^localhost$',
+            ])),
             subdomains: false,
         );
     })
