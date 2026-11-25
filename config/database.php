@@ -3,8 +3,6 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
-$mysqlDatabaseUrl = env('DB_URL') ?: env('DATABASE_URL');
-
 return [
 
     /*
@@ -48,7 +46,7 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
-            'url' => $mysqlDatabaseUrl,
+            'url' => env('DB_URL', env('DATABASE_URL')),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'zentrix_astra'),
@@ -68,7 +66,7 @@ return [
 
         'mariadb' => [
             'driver' => 'mariadb',
-            'url' => $mysqlDatabaseUrl,
+            'url' => env('DB_URL', env('DATABASE_URL')),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
             'database' => env('DB_DATABASE', 'zentrix_astra'),
