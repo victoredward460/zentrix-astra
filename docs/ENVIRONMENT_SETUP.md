@@ -22,6 +22,7 @@ Set these in the hosting platform's secret/configuration UI. The host's exact va
 | `DB_CONNECTION` | `mysql` |
 | `DB_HOST`, `DB_PORT` | Values from the managed database provider |
 | `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Dedicated production database/schema and least-privilege account values |
+| `DATABASE_URL` | Optional full database connection URL supplied by the host. The app accepts this as a fallback to `DB_URL`; if neither URL is set, use the individual `DB_*` values above. |
 | `MYSQL_ATTR_SSL_CA` | Provider CA file/path when required for MySQL TLS; this is the variable read by the current MySQL connection configuration |
 | `SESSION_DRIVER` | `database` |
 | `SESSION_ENCRYPT` | `true` |
@@ -50,7 +51,7 @@ Copy the output directly into the host's secret field. Do not send it here, put 
 
 Provision a production MySQL-compatible database and a dedicated user with only the permissions needed to run migrations and application queries. Require TLS if the service supports it. The app expects the PDO MySQL extension, uses `utf8mb4`, and configures strict mode. OpenPhish feed tables remain in the historical migration/schema for compatibility; the application no longer refreshes or queries them.
 
-Do not use the SQLite test database or development credentials for production. Configure and validate production environment settings before running `php artisan migrate --force`.
+Do not use the SQLite test database or development credentials for production. If the host's database add-on supplies `DATABASE_URL`, the application uses it when `DB_URL` is unset. Configure and validate the production database connection before running `php artisan migrate --force`.
 
 ### Password-reset email
 
@@ -80,7 +81,7 @@ These are not required to launch the locally implemented modules:
 - Install production PHP dependencies from `composer.lock`: `composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction`.
 - Use `php artisan optimize` only after production variables are available in the process. Re-run the appropriate cache commands and restart workers after configuration changes.
 - Keep `storage/` and `bootstrap/cache/` writable by the PHP service account. Persist `storage/app/private/file-checks` across restarts and releases.
-- `APP_URL` anchors trusted-host validation for application routes; `127.0.0.1` and `localhost` are also permitted. Public GET/HEAD requests to `/` and the generic liveness endpoint `/up` bypass host validation so internal platform probes work. Set the deployment health-check path to `/up`; other routes retain the host allowlist.
+- `APP_URL` anchors trusted-host validation for application routes; `127.0.0.1` and `localhost` are also permitted. Only the generic liveness endpoint `/up` bypasses host validation so internal platform probes work. Set the deployment health-check path to `/up`, not `/`; the home page uses web/session middleware and may require the production database.
 - Configure the host to terminate HTTPS, redirect HTTP to HTTPS, and correctly communicate the external scheme to PHP. Do not trust arbitrary forwarded headers; use the host's documented trusted-proxy settings if application-level proxy trust becomes necessary.
 
 For platform requirements and the release process, see [Deployment Guide](./DEPLOYMENT_GUIDE.md). For missing platform capabilities and non-launch-ready items, see [Known Limitations](./KNOWN_LIMITATIONS.md).

@@ -9,10 +9,8 @@ class TrustHostsForHealthChecks extends TrustHosts
 {
     public function handle(Request $request, $next)
     {
-        $isPublicHealthPath = $request->path() === '/' || $request->is('up');
-
-        if (in_array($request->method(), ['GET', 'HEAD'], true) && $isPublicHealthPath) {
-            // These public pages are safe for internal probes with non-public Host headers.
+        if (in_array($request->method(), ['GET', 'HEAD'], true) && $request->is('up')) {
+            // The liveness endpoint is independent of database-backed web sessions.
             Request::setTrustedHosts([]);
 
             return $next($request);

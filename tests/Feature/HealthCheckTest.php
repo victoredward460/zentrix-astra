@@ -29,13 +29,6 @@ class HealthCheckTest extends TestCase
             ->assertOk();
     }
 
-    public function test_public_homepage_accepts_the_deployment_probe_host(): void
-    {
-        $this->withServerVariables(['HTTP_HOST' => 'health-probe.internal'])
-            ->get('/')
-            ->assertOk();
-    }
-
     public function test_loopback_hosts_are_trusted_without_allowing_unconfigured_hosts(): void
     {
         config(['app.url' => 'https://zentrix.example']);
@@ -69,18 +62,24 @@ class HealthCheckTest extends TestCase
 
             Request::setTrustedHosts(['^zentrix\.example$']);
 
-            $homeResponse = $middleware->handle(
-                Request::create('http://health-probe.internal/'),
-                fn (Request $request) => response($request->getHost()),
-            );
-
-            $this->assertSame('health-probe.internal', $homeResponse->getContent());
-
-            Request::setTrustedHosts(['^zentrix\.example$']);
-
             $this->expectException(SuspiciousOperationException::class);
             $middleware->handle(
                 Request::create('http://health-probe.internal/agent'),
+                fn (Request $request) => response($request->getHost()),
+            );
+        } finally {
+            Request::setTrustedHosts([]);
+        }
+    }
+
+    public function test_homepage_does_not_bypass_trusted_host_validation(): void
+    {
+        Request::setTrustedHosts(['^zentrix\.example$']);
+
+        try {
+            $this->expectException(SuspiciousOperationException::class);
+            app(TrustHostsForHealthChecks::class)->handle(
+                Request::create('http://health-probe.internal/'),
                 fn (Request $request) => response($request->getHost()),
             );
         } finally {
