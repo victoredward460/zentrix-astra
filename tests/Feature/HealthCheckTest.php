@@ -37,6 +37,10 @@ class HealthCheckTest extends TestCase
 
         try {
             $this->assertSame('zentrix.example', Request::create('https://zentrix.example/index.php')->getHost());
+            $this->assertSame(
+                'zentrix-astra.ethiodeploy.app',
+                Request::create('https://zentrix-astra.ethiodeploy.app/index.php')->getHost(),
+            );
             $this->assertSame('127.0.0.1', Request::create('http://127.0.0.1/index.php')->getHost());
             $this->assertSame('localhost', Request::create('http://localhost/index.php')->getHost());
 

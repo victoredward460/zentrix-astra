@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustHosts(
             at: fn () => array_values(array_unique([
                 '^'.preg_quote((string) parse_url((string) config('app.url'), PHP_URL_HOST)).'$',
+                '^zentrix-astra\.ethiodeploy\.app$',
                 '^127\.0\.0\.1$',
                 '^localhost$',
             ])),
