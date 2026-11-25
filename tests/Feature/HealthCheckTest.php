@@ -29,6 +29,13 @@ class HealthCheckTest extends TestCase
             ->assertOk();
     }
 
+    public function test_public_homepage_accepts_the_deployment_probe_host(): void
+    {
+        $this->withServerVariables(['HTTP_HOST' => 'health-probe.internal'])
+            ->get('/')
+            ->assertOk();
+    }
+
     public function test_loopback_hosts_are_trusted_without_allowing_unconfigured_hosts(): void
     {
         config(['app.url' => 'https://zentrix.example']);
@@ -59,6 +66,15 @@ class HealthCheckTest extends TestCase
             );
 
             $this->assertSame('health-probe.internal', $healthResponse->getContent());
+
+            Request::setTrustedHosts(['^zentrix\.example$']);
+
+            $homeResponse = $middleware->handle(
+                Request::create('http://health-probe.internal/'),
+                fn (Request $request) => response($request->getHost()),
+            );
+
+            $this->assertSame('health-probe.internal', $homeResponse->getContent());
 
             Request::setTrustedHosts(['^zentrix\.example$']);
 
