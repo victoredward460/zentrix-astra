@@ -115,7 +115,7 @@ class CheckIntegrations extends Command
             return ['OpenRouter', 'Present', 'Key authenticated; '.$exception->userMessage()];
         }
 
-        $privacyStatus = config('ai.openrouter.require_zdr', true)
+        $privacyStatus = config('ai.openrouter.require_zdr', false)
             ? 'free strict-ZDR NVIDIA endpoint metadata found; inference not tested'
             : 'free NVIDIA endpoint metadata found; strict ZDR disabled; inference not tested';
 

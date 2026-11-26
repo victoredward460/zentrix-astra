@@ -19,7 +19,7 @@ class OpenRouterChatProvider implements AgentChatProvider
         $key = config('services.openrouter.api_key');
         $model = $this->model();
         $baseUrl = rtrim((string) config('services.openrouter.base_url'), '/');
-        $dataCollection = config('ai.openrouter.data_collection', 'deny');
+        $dataCollection = config('ai.openrouter.data_collection', 'allow');
 
         return is_string($key)
             && trim($key) !== ''
@@ -65,14 +65,14 @@ class OpenRouterChatProvider implements AgentChatProvider
         $providerPreferences = [
             'only' => ['nvidia'],
             'allow_fallbacks' => false,
-            'data_collection' => config('ai.openrouter.data_collection', 'deny'),
+            'data_collection' => config('ai.openrouter.data_collection', 'allow'),
             'max_price' => [
                 'prompt' => 0,
                 'completion' => 0,
             ],
         ];
 
-        if (config('ai.openrouter.require_zdr', true)) {
+        if (config('ai.openrouter.require_zdr', false)) {
             $providerPreferences['zdr'] = true;
         }
 

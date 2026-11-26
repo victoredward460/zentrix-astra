@@ -50,7 +50,7 @@ class OpenRouterEndpointDiscovery
             throw new AgentProviderException(AgentProviderFailure::ModelUnavailable);
         }
 
-        if (! config('ai.openrouter.require_zdr', true)) {
+        if (! config('ai.openrouter.require_zdr', false)) {
             return [self::NVIDIA_PROVIDER];
         }
 

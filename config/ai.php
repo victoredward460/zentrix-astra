@@ -11,8 +11,8 @@ return [
         'reasoning_disabled_models' => [
             'nvidia/nemotron-3.5-super-vl:free',
         ],
-        'require_zdr' => (bool) env('OPENROUTER_REQUIRE_ZDR', true),
-        'data_collection' => env('OPENROUTER_DATA_COLLECTION', 'deny'),
+        'require_zdr' => (bool) env('OPENROUTER_REQUIRE_ZDR', false),
+        'data_collection' => env('OPENROUTER_DATA_COLLECTION', 'allow'),
         'connect_timeout' => (int) env('OPENROUTER_CONNECT_TIMEOUT', 5),
         'timeout' => (int) env('OPENROUTER_TIMEOUT', 45),
         'max_tokens' => 700,

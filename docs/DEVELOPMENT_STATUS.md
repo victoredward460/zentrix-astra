@@ -15,7 +15,7 @@ The project is **not production-ready**. No production host has been identified 
 | Frontend | `npm run build` passed with local Oxanium and updated application assets. SVG and ICO favicon variants are updated. |
 | PHP formatting | Targeted Pint check passed for all changed PHP files. |
 | Browser | Public landing page was checked at 390, 768, and 1366 px. The redesigned AI Agent was checked at 375 and 1366 px with no horizontal overflow, and a new conversation persisted after reload. Authenticated admin multi-viewport checks remain outstanding. |
-| Provider behavior | OpenRouter allows users to choose between free Nemotron 3 Ultra (default) and free Nemotron 3.5 Super VL. Live endpoint discovery and harmless chat completions succeeded for both; routing remains NVIDIA-only with provider fallbacks disabled and a zero-price cap. Strict ZDR is disabled locally. Provider data collection is explicitly allowed locally for training; the environment example and config default remain `deny`. |
+| Provider behavior | OpenRouter allows users to choose between free Nemotron 3 Ultra (default) and free Nemotron 3.5 Super VL. Live endpoint discovery and harmless chat completions succeeded for both; routing remains NVIDIA-only with provider fallbacks disabled and a zero-price cap. Following owner authorization, strict ZDR is not required by default and provider data collection defaults to `allow`, permitting NVIDIA to retain prompts and use them for training under its policy. |
 
 ## Administrator controls
 

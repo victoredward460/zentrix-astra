@@ -405,12 +405,12 @@ class ProviderIntegrationTest extends TestCase
         );
     }
 
-    public function test_non_zdr_discovery_still_selects_only_the_free_nvidia_endpoint(): void
+    public function test_default_discovery_selects_free_nvidia_without_requiring_zdr_metadata(): void
     {
         config([
             'services.openrouter.base_url' => 'https://openrouter.ai/api/v1',
-            'ai.openrouter.require_zdr' => false,
         ]);
+        config()->offsetUnset('ai.openrouter.require_zdr');
         Cache::flush();
         Http::fake([
             'https://openrouter.ai/api/v1/models/nvidia/nemotron-3-ultra-550b-a55b:free/endpoints' => Http::response([
@@ -437,14 +437,15 @@ class ProviderIntegrationTest extends TestCase
         Http::assertNotSent(fn (Request $request): bool => str_ends_with($request->url(), '/endpoints/zdr'));
     }
 
-    public function test_non_zdr_completion_keeps_nvidia_only_zero_cost_and_no_data_collection_constraints(): void
+    public function test_default_completion_allows_data_collection_without_relaxing_provider_or_price_limits(): void
     {
         config([
             'services.openrouter.api_key' => 'openrouter-test-secret',
             'services.openrouter.base_url' => 'https://openrouter.ai/api/v1',
             'services.openrouter.model' => 'nvidia/nemotron-3-ultra-550b-a55b:free',
-            'ai.openrouter.require_zdr' => false,
+            'ai.openrouter.data_collection' => 'allow',
         ]);
+        config()->offsetUnset('ai.openrouter.require_zdr');
         $this->mock(\App\Services\AI\OpenRouterEndpointDiscovery::class, function ($mock): void {
             $mock->shouldReceive('eligibleProviders')->once()->andReturn(['nvidia']);
         });
@@ -463,7 +464,7 @@ class ProviderIntegrationTest extends TestCase
             $request->data()['provider'] === [
                 'only' => ['nvidia'],
                 'allow_fallbacks' => false,
-                'data_collection' => 'deny',
+                'data_collection' => 'allow',
                 'max_price' => ['prompt' => 0, 'completion' => 0],
             ]
             && ! array_key_exists('zdr', $request->data()['provider'])
